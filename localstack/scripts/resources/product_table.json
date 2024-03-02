@@ -1,0 +1,29 @@
+{
+  "TableName": "Product",
+  "KeySchema": [
+    { "AttributeName": "ProductID", "KeyType": "HASH" }
+  ],
+  "AttributeDefinitions": [
+    { "AttributeName": "ProductID", "AttributeType": "S" },
+    { "AttributeName": "OwnerID", "AttributeType": "S" }
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "OwnerIDIndex",
+      "KeySchema": [
+        { "AttributeName": "OwnerID", "KeyType": "HASH" }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+      }
+    }
+  ],
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 5,
+    "WriteCapacityUnits": 5
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "TableName": "Category",
+  "KeySchema": [
+    { "AttributeName": "CategoryID", "KeyType": "HASH" }
+  ],
+  "AttributeDefinitions": [
+    { "AttributeName": "CategoryID", "AttributeType": "S" },
+    { "AttributeName": "OwnerID", "AttributeType": "S" }
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "OwnerIDIndex",
+      "KeySchema": [
+        { "AttributeName": "OwnerID", "KeyType": "HASH" }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+      }
+    }
+  ],
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 5,
+    "WriteCapacityUnits": 5
+  }
+}
