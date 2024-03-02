@@ -1,0 +1,11 @@
+server:
+  servlet:
+    context-path: /product-catalog
+  port: 8080
+
+spring:
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+
+security:
+  jwt-secret: change-it
