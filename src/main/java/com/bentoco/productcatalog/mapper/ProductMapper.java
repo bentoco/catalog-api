@@ -1,0 +1,25 @@
+package com.bentoco.productcatalog.mapper;
+
+import com.bentoco.productcatalog.controller.request.ProductRequest;
+import com.bentoco.productcatalog.dynamodb.ProductItem;
+import com.bentoco.productcatalog.model.Product;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
+
+import java.util.UUID;
+
+@Mapper(componentModel = "spring", imports = UUID.class)
+public interface ProductMapper {
+
+    ProductMapper INSTANCE = Mappers.getMapper(ProductMapper.class);
+
+    @Mapping(target = "id", expression = "java(UUID.randomUUID())")
+    @Mapping(target = "owner.id", source = "ownerId")
+    @Mapping(target = "category.id", source = "categoryId")
+    Product toModel(ProductRequest productRequest);
+
+    @Mapping(target = "ownerId", source = "owner.id")
+    @Mapping(target = "categoryId", source = "category.id")
+    ProductItem toItem(Product product);
+}
