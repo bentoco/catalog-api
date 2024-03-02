@@ -1,7 +1,7 @@
 package com.bentoco.productcatalog.configurations.middlewares;
 
 import com.bentoco.productcatalog.configurations.interfaces.AccessControl;
-import com.bentoco.productcatalog.security.Profile;
+import com.bentoco.productcatalog.core.model.Profile;
 import com.bentoco.productcatalog.utils.JwtUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

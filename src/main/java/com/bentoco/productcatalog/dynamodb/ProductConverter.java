@@ -1,5 +1,6 @@
 package com.bentoco.productcatalog.dynamodb;
 
+import com.bentoco.productcatalog.dynamodb.tables.ProductTable;
 import software.amazon.awssdk.enhanced.dynamodb.AttributeConverter;
 import software.amazon.awssdk.enhanced.dynamodb.AttributeValueType;
 import software.amazon.awssdk.enhanced.dynamodb.EnhancedType;
@@ -7,38 +8,39 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 import java.util.Map;
 
-public class ProductConverter implements AttributeConverter<ProductItem> {
+public class ProductConverter implements AttributeConverter<ProductTable> {
+
     @Override
-    public AttributeValue transformFrom(ProductItem input) {
+    public AttributeValue transformFrom(ProductTable input) {
         Map<String, AttributeValue> attributeValueMap = Map.of(
-                "pk", AttributeValue.fromS(input.getOwnerId()),
-                "sk", AttributeValue.fromS(input.getCategoryId()),
-                "item_id", AttributeValue.fromS(input.getId()),
-                "item_title", AttributeValue.fromS(input.getTitle()),
-                "item_description", AttributeValue.fromS(input.getDescription()),
-                "item_price", AttributeValue.fromN(input.getPrice())
+                "ProductID", AttributeValue.fromS(input.getProductId()),
+                "OwnerID", AttributeValue.fromS(input.getOwnerId()),
+                "CategoryID", AttributeValue.fromS(input.getCategoryId()),
+                "Title", AttributeValue.fromS(input.getTitle()),
+                "Description", AttributeValue.fromS(input.getDescription()),
+                "Price", AttributeValue.fromN(String.valueOf(input.getPrice().doubleValue()))
         );
 
         return AttributeValue.fromM(attributeValueMap);
     }
 
     @Override
-    public ProductItem transformTo(AttributeValue input) {
+    public ProductTable transformTo(AttributeValue input) {
         Map<String, AttributeValue> m = input.m();
-        ProductItem productItem = new ProductItem();
-        productItem.setOwnerId(m.get("pk").s());
-        productItem.setCategoryId(m.get("sk").s());
-        productItem.setId(m.get("item_id").s());
-        productItem.setTitle(m.get("item_title").s());
-        productItem.setDescription(m.get("item_description").s());
-        productItem.setPrice(m.get("item_price").n());
+        ProductTable productTable = new ProductTable();
+        productTable.setProductId(m.get("ProductID").s());
+        productTable.setOwnerId(m.get("OwnerID").s());
+        productTable.setCategoryId(m.get("CategoryID").s());
+        productTable.setTitle(m.get("Title").s());
+        productTable.setDescription(m.get("Description").s());
+        productTable.setPrice(Double.valueOf(m.get("Price").n()));
 
-        return productItem;
+        return productTable;
     }
 
     @Override
-    public EnhancedType<ProductItem> type() {
-        return EnhancedType.of(ProductItem.class);
+    public EnhancedType<ProductTable> type() {
+        return EnhancedType.of(ProductTable.class);
     }
 
     @Override

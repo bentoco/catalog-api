@@ -6,7 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
 import com.bentoco.productcatalog.controller.exception.InsufficientRoleException;
 import com.bentoco.productcatalog.controller.exception.UnauthorizedException;
-import com.bentoco.productcatalog.security.Role;
+import com.bentoco.productcatalog.core.model.Role;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,6 +38,7 @@ public class JwtUtils {
     public Claim extractClaimFromJwt(final String authorization, final String claim) {
         try {
             var verifier = getJwtVerifier();
+            //todo: refactor
             var verifiedToken = verifier.verify(authorization);
             return verifiedToken.getClaims().get(claim);
         } catch (Exception exception) {

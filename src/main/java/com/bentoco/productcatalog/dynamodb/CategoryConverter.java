@@ -1,5 +1,6 @@
 package com.bentoco.productcatalog.dynamodb;
 
+import com.bentoco.productcatalog.dynamodb.tables.CategoryTable;
 import lombok.SneakyThrows;
 import software.amazon.awssdk.enhanced.dynamodb.AttributeConverter;
 import software.amazon.awssdk.enhanced.dynamodb.AttributeValueType;
@@ -8,34 +9,34 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 import java.util.Map;
 
-public class CategoryConverter implements AttributeConverter<CategoryItem> {
+public class CategoryConverter implements AttributeConverter<CategoryTable> {
 
     @SneakyThrows
     @Override
-    public AttributeValue transformFrom(CategoryItem input) {
+    public AttributeValue transformFrom(CategoryTable input) {
         Map<String, AttributeValue> attributeValueMap = Map.of(
-                "sk", AttributeValue.fromS(input.getId()),
-                "title", AttributeValue.fromS(input.getTitle()),
-                "description", AttributeValue.fromS(input.getDescription()));
-
+                "CategoryID", AttributeValue.fromS(input.getCategoryId()),
+                "OwnerID", AttributeValue.fromS(input.getOwnerId()),
+                "Title", AttributeValue.fromS(input.getTitle()),
+                "Description", AttributeValue.fromS(input.getDescription()));
         return AttributeValue.fromM(attributeValueMap);
     }
 
     @SneakyThrows
     @Override
-    public CategoryItem transformTo(AttributeValue input) {
+    public CategoryTable transformTo(AttributeValue input) {
         Map<String, AttributeValue> m = input.m();
-        CategoryItem categoryItem = new CategoryItem();
-        categoryItem.setId(m.get("sk").s());
-        categoryItem.setTitle(m.get("title").s());
-        categoryItem.setDescription(m.get("description").s());
-
-        return categoryItem;
+        CategoryTable categoryTable = new CategoryTable();
+        categoryTable.setCategoryId(m.get("CategoryID").s());
+        categoryTable.setOwnerId(m.get("OwnerID").s());
+        categoryTable.setTitle(m.get("Title").s());
+        categoryTable.setDescription(m.get("Description").s());
+        return categoryTable;
     }
 
     @Override
-    public EnhancedType<CategoryItem> type() {
-        return EnhancedType.of(CategoryItem.class);
+    public EnhancedType<CategoryTable> type() {
+        return EnhancedType.of(CategoryTable.class);
     }
 
     @Override

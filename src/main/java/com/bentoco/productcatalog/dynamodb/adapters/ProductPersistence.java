@@ -1,9 +1,10 @@
-package com.bentoco.productcatalog.dynamodb;
+package com.bentoco.productcatalog.dynamodb.adapters;
 
 import com.bentoco.productcatalog.controller.exception.DynamoDbOperationsErrorException;
-import com.bentoco.productcatalog.mapper.ProductMapper;
-import com.bentoco.productcatalog.model.Product;
-import com.bentoco.productcatalog.repositories.ProductRepository;
+import com.bentoco.productcatalog.dynamodb.tables.ProductTable;
+import com.bentoco.productcatalog.mappers.ProductMapper;
+import com.bentoco.productcatalog.core.model.Product;
+import com.bentoco.productcatalog.core.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,6 +23,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProductPersistence implements ProductRepository {
 
+    static final String PRODUCT_TABLE = "Product";
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
 
     private final static ProductMapper productMapper = ProductMapper.INSTANCE;
@@ -29,11 +31,11 @@ public class ProductPersistence implements ProductRepository {
 
     @Override
     public void upsert(final Product product) {
-        ProductItem productItem = productMapper.toItem(product);
-        logger.info("inserting product item: {}", productItem);
+        ProductTable productTable = productMapper.toTable(product);
+        logger.info("inserting product item: {}", productTable);
 
-        var productRequest = PutItemEnhancedRequest.builder(ProductItem.class)
-                .item(productItem)
+        var productRequest = PutItemEnhancedRequest.builder(ProductTable.class)
+                .item(productTable)
                 .build();
         try {
             this.getTable().putItem(productRequest);
@@ -55,8 +57,7 @@ public class ProductPersistence implements ProductRepository {
         return Key.builder().partitionValue(String.valueOf(pk)).build();
     }
 
-    private DynamoDbTable<ProductItem> getTable() {
-        return dynamoDbEnhancedClient.table("productcatalog",
-                TableSchema.fromBean(ProductItem.class));
+    private DynamoDbTable<ProductTable> getTable() {
+        return dynamoDbEnhancedClient.table(PRODUCT_TABLE, TableSchema.fromBean(ProductTable.class));
     }
 }
