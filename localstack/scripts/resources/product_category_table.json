@@ -1,0 +1,15 @@
+{
+  "TableName": "ProductCategoryMapping",
+  "KeySchema": [
+    { "AttributeName": "ProductID", "KeyType": "HASH" },
+    { "AttributeName": "CategoryID", "KeyType": "RANGE" }
+  ],
+  "AttributeDefinitions": [
+    { "AttributeName": "ProductID", "AttributeType": "S" },
+    { "AttributeName": "CategoryID", "AttributeType": "S" }
+  ],
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 5,
+    "WriteCapacityUnits": 5
+  }
+}
