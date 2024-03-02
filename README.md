@@ -1,5 +1,4 @@
-# Product Catalogue
-Product management service, inspired by the anota.ai challenge.
+Our product management service provides customers with catalogs, drawing inspiration from the Anota.ai challenge.
 
 Reference: https://github.com/githubanotaai/new-test-backend-nodejs
 
@@ -10,7 +9,7 @@ To explore the API documentation and interact with the endpoints using Swagger U
 
 2. Open your web browser and navigate to the Swagger UI URL:
 ```bash
-http://localhost:8080/product-catalogue/swagger-ui/index.html
+http://localhost:8080/product-catalog/swagger-ui/index.html
 ```
 3. You will be redirected to the Swagger UI interface, where you can browse the available endpoints, view their parameters, and test them interactively.
 
