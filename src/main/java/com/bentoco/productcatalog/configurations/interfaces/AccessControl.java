@@ -1,6 +1,6 @@
 package com.bentoco.productcatalog.configurations.interfaces;
 
-import com.bentoco.productcatalog.security.Role;
+import com.bentoco.productcatalog.core.model.Role;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

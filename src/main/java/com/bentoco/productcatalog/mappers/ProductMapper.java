@@ -1,8 +1,8 @@
-package com.bentoco.productcatalog.mapper;
+package com.bentoco.productcatalog.mappers;
 
 import com.bentoco.productcatalog.controller.request.ProductRequest;
-import com.bentoco.productcatalog.dynamodb.ProductItem;
-import com.bentoco.productcatalog.model.Product;
+import com.bentoco.productcatalog.dynamodb.tables.ProductTable;
+import com.bentoco.productcatalog.core.model.Product;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -19,7 +19,8 @@ public interface ProductMapper {
     @Mapping(target = "category.id", source = "categoryId")
     Product toModel(ProductRequest productRequest);
 
+    @Mapping(target = "productId", source = "id")
     @Mapping(target = "ownerId", source = "owner.id")
     @Mapping(target = "categoryId", source = "category.id")
-    ProductItem toItem(Product product);
+    ProductTable toTable(Product product);
 }

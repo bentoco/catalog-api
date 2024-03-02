@@ -1,4 +1,4 @@
-package com.bentoco.productcatalog.model;
+package com.bentoco.productcatalog.core.model;
 
 import java.util.UUID;
 

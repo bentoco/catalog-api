@@ -1,9 +1,9 @@
 package com.bentoco.productcatalog.controller;
 
 import com.bentoco.productcatalog.configurations.interfaces.AccessControl;
-import com.bentoco.productcatalog.security.Role;
+import com.bentoco.productcatalog.core.model.Role;
 import com.bentoco.productcatalog.controller.request.ProductRequest;
-import com.bentoco.productcatalog.mapper.ProductMapper;
+import com.bentoco.productcatalog.mappers.ProductMapper;
 import com.bentoco.productcatalog.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;

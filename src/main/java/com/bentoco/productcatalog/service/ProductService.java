@@ -1,7 +1,7 @@
 package com.bentoco.productcatalog.service;
 
-import com.bentoco.productcatalog.model.Product;
-import com.bentoco.productcatalog.repositories.ProductRepository;
+import com.bentoco.productcatalog.core.model.Product;
+import com.bentoco.productcatalog.core.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

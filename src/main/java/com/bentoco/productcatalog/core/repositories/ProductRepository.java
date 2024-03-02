@@ -1,6 +1,6 @@
-package com.bentoco.productcatalog.repositories;
+package com.bentoco.productcatalog.core.repositories;
 
-import com.bentoco.productcatalog.model.Product;
+import com.bentoco.productcatalog.core.model.Product;
 
 import java.util.UUID;
 
