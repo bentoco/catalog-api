@@ -30,21 +30,22 @@ public class RequestInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         var authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+        jwtUtils.extractPayload(authorization);
+        this.setOwnerIdToContext();
+        return hasRequiredPermission((HandlerMethod) handler);
+    }
 
-        setContext(authorization);
-
-        var handlerMethod = (HandlerMethod) handler;
+    private boolean hasRequiredPermission(HandlerMethod handlerMethod) {
         var roleRequired = handlerMethod.getMethodAnnotation(AccessControl.class);
         if (Objects.isNull(roleRequired)) {
             logger.info("no role requirement for this method. all users are welcome!");
             return true;
         }
-        return jwtUtils.validateTokenRoles(authorization, roleRequired.value());
+        return jwtUtils.validateRoles(roleRequired.value());
     }
 
-    private void setContext(final String authorization) {
-        var ownerId = jwtUtils.extractClaimFromJwt(authorization, OWNER_ID_CLAIM).asString();
+    private void setOwnerIdToContext() {
+        var ownerId = jwtUtils.extractClaim(OWNER_ID_CLAIM).asString();
         requestContext.profile = new Profile(UUID.fromString(ownerId));
     }
-
 }

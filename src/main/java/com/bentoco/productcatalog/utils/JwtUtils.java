@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.bentoco.productcatalog.constants.JwtClaimConstants.ROLE_CLAIM;
 
@@ -22,11 +24,13 @@ public class JwtUtils {
     @Value("${security.jwt-secret}")
     private String secret;
 
+    private Map<String, Claim> payload = null;
+
     private static final Logger logger = LogManager.getLogger(JwtUtils.class);
 
-    public Boolean validateTokenRoles(String authorization, Role[] roles) {
+    public Boolean validateRoles(Role[] roles) {
         try {
-            var roleClaim = extractClaimFromJwt(authorization, ROLE_CLAIM).asString();
+            var roleClaim = extractClaim(ROLE_CLAIM).asString();
             var roleToCheck = Role.valueOf(roleClaim);
             return Arrays.asList(roles).contains(roleToCheck);
         } catch (Exception exception) {
@@ -35,12 +39,20 @@ public class JwtUtils {
         }
     }
 
-    public Claim extractClaimFromJwt(final String authorization, final String claim) {
+    public void extractPayload(final String authorization) {
         try {
             var verifier = getJwtVerifier();
-            //todo: refactor
             var verifiedToken = verifier.verify(authorization);
-            return verifiedToken.getClaims().get(claim);
+            payload = verifiedToken.getClaims();
+        } catch (Exception exception) {
+            logger.error("invalid authorization token.");
+            throw new UnauthorizedException("invalid or missing authentication credentials.");
+        }
+    }
+
+    public Claim extractClaim(final String claim) {
+        try {
+            return payload.get(claim);
         } catch (Exception exception) {
             logger.error("{} claim is required.", claim);
             throw new InsufficientRoleException("access denied. please check yours credentials.");
