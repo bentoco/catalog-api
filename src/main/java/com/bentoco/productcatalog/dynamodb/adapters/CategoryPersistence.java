@@ -2,11 +2,11 @@ package com.bentoco.productcatalog.dynamodb.adapters;
 
 import com.bentoco.productcatalog.configurations.middlewares.RequestContext;
 import com.bentoco.productcatalog.controller.exception.DynamoDbOperationsErrorException;
+import com.bentoco.productcatalog.core.model.Category;
 import com.bentoco.productcatalog.core.model.Owner;
-import com.bentoco.productcatalog.core.model.Product;
-import com.bentoco.productcatalog.core.repositories.ProductRepository;
-import com.bentoco.productcatalog.dynamodb.tables.ProductTable;
-import com.bentoco.productcatalog.mappers.ProductMapper;
+import com.bentoco.productcatalog.core.repositories.CategoryRepository;
+import com.bentoco.productcatalog.dynamodb.tables.CategoryTable;
+import com.bentoco.productcatalog.mappers.CategoryMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,39 +25,39 @@ import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
-public class ProductPersistence implements ProductRepository {
+public class CategoryPersistence implements CategoryRepository {
 
-    static final String PRODUCT_TABLE = "Product";
+    static final String CATEGORY_TABLE = "Category";
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
     private final RequestContext requestContext;
 
-    private final static ProductMapper productMapper = ProductMapper.INSTANCE;
-    private final static Logger logger = LogManager.getLogger(ProductPersistence.class);
+    private final static CategoryMapper categoryMapper = CategoryMapper.INSTANCE;
+    private final static Logger logger = LogManager.getLogger(CategoryPersistence.class);
 
     @Override
-    public UUID upsert(final Product product) {
+    public UUID upsert(final Category category) {
         Owner owner = new Owner(requestContext.getProfile().ownerId());
-        product.setOwner(owner);
+        category.setOwner(owner);
 
-        ProductTable productTable = productMapper.toTable(product);
-        var productRequest = PutItemEnhancedRequest.builder(ProductTable.class)
-                .item(productTable)
+        CategoryTable categoryTable = categoryMapper.toTable(category);
+        var categoryRequest = PutItemEnhancedRequest.builder(CategoryTable.class)
+                .item(categoryTable)
                 .build();
 
-        logger.info("inserting product item: {}", productTable);
+        logger.info("inserting category item: {}", categoryTable);
         try {
-            this.getTable().putItem(productRequest);
-            return product.getId();
+            this.getTable().putItem(categoryRequest);
+            return category.getId();
         } catch (DynamoDbException e) {
-            logger.error("error inserting product item: {}", e.getMessage());
+            logger.error("error creating category item: {}", e.getMessage());
             throw new DynamoDbOperationsErrorException(e.getMessage());
         }
     }
 
     @Override
-    public void delete(final UUID productId) {
+    public void delete(UUID categoryId) {
         String ownerId = String.valueOf(requestContext.getProfile().ownerId());
-        String partitionKey = ProductTable.prefixedId(String.valueOf(productId));
+        String partitionKey = CategoryTable.prefixedId(String.valueOf(categoryId));
         var deleteRequest = DeleteItemEnhancedRequest.builder()
                 .conditionExpression(Expression.builder()
                         .expression("OwnerID = :owner_id")
@@ -67,12 +67,12 @@ public class ProductPersistence implements ProductRepository {
         try {
             this.getTable().deleteItem(deleteRequest);
         } catch (ConditionalCheckFailedException e) {
-            logger.error("error deleting product item: {}", e.getMessage());
+            logger.error("error deleting category item: {}", e.getMessage());
             throw new DynamoDbOperationsErrorException(e.getMessage());
         }
     }
 
-    private DynamoDbTable<ProductTable> getTable() {
-        return dynamoDbEnhancedClient.table(PRODUCT_TABLE, TableSchema.fromBean(ProductTable.class));
+    private DynamoDbTable<CategoryTable> getTable() {
+        return dynamoDbEnhancedClient.table(CATEGORY_TABLE, TableSchema.fromBean(CategoryTable.class));
     }
 }

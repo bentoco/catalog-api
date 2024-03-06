@@ -1,10 +1,10 @@
 package com.bentoco.productcatalog.controller;
 
 import com.bentoco.productcatalog.configurations.interfaces.AccessControl;
-import com.bentoco.productcatalog.controller.request.ProductRequest;
+import com.bentoco.productcatalog.controller.request.CategoryRequest;
 import com.bentoco.productcatalog.core.model.Role;
-import com.bentoco.productcatalog.mappers.ProductMapper;
-import com.bentoco.productcatalog.service.ProductService;
+import com.bentoco.productcatalog.mappers.CategoryMapper;
+import com.bentoco.productcatalog.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,34 +26,34 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/products")
-public class ProductController {
+@RequestMapping("/v1/categories")
+public class CategoryController {
 
-    private final static Logger logger = LogManager.getLogger(ProductController.class);
-    private final static ProductMapper productMapper = ProductMapper.INSTANCE;
+    private final static Logger logger = LogManager.getLogger(CategoryController.class);
+    private final static CategoryMapper categoryMapper = CategoryMapper.INSTANCE;
 
-    private final ProductService productService;
+    private final CategoryService categoryService;
 
     @PostMapping
     @AccessControl({Role.ADMIN, Role.OWNER})
-    @Operation(tags = {"Product"})
+    @Operation(tags = {"Category"})
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<?> upsertProduct(@Valid @RequestBody ProductRequest productRequest, UriComponentsBuilder uriBuilder) {
-        logger.info("receive product request: {}", productRequest);
-        UUID productId = productService.upsertProduct(productMapper.toModel(productRequest));
+    public ResponseEntity<?> upsertCategory(@Valid @RequestBody CategoryRequest categoryRequest, UriComponentsBuilder uriBuilder) {
+        logger.info("receive category request: {}", categoryRequest);
+        UUID categoryId = categoryService.upsertCategory(categoryMapper.toModel(categoryRequest));
 
-        URI locationUri = uriBuilder.path("/v1/products/{id}").buildAndExpand(productId).toUri();
+        URI locationUri = uriBuilder.path("/v1/categories/{id}").buildAndExpand(categoryId).toUri();
 
         return ResponseEntity.created(locationUri).build();
     }
 
     @DeleteMapping
     @AccessControl({Role.ADMIN, Role.OWNER})
-    @Operation(tags = {"Product"})
+    @Operation(tags = {"Category"})
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<?> deleteProduct(@RequestParam(value = "product_id") String productId) {
-        logger.info("receive delete request to id: {}", productId);
-        productService.deleteProduct(UUID.fromString(productId));
+    public ResponseEntity<?> deleteCategory(@RequestParam(value = "category_id") String categoryId) {
+        logger.info("receive delete request to id: {}", categoryId);
+        categoryService.deleteCategory(UUID.fromString(categoryId));
         return ResponseEntity.noContent().build();
     }
 }
