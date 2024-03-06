@@ -15,7 +15,6 @@ public interface ProductMapper {
     ProductMapper INSTANCE = Mappers.getMapper(ProductMapper.class);
 
     @Mapping(target = "id", expression = "java(UUID.randomUUID())")
-    @Mapping(target = "owner.id", source = "ownerId")
     @Mapping(target = "category.id", source = "categoryId")
     Product toModel(ProductRequest productRequest);
 

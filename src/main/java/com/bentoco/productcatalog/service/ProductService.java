@@ -16,9 +16,9 @@ public class ProductService {
     private static final Logger logger = LogManager.getLogger(ProductService.class);
     private final ProductRepository productRepository;
 
-    public void upsertProduct(final Product product) {
+    public UUID upsertProduct(final Product product) {
         logger.info("inserting product: {}", product);
-        productRepository.upsert(product);
+        return productRepository.upsert(product);
     }
 
     public void deleteProduct(final UUID productId) {

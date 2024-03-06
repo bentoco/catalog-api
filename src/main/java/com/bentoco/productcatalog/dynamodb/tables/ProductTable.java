@@ -15,7 +15,7 @@ public class ProductTable {
 
     static String PRODUCT_PREFIX = "ProductID#";
 
-    static String prefixedId(String id) {
+    public static String prefixedId(String id) {
         return PRODUCT_PREFIX + id;
     }
 

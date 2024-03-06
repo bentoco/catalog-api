@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -28,7 +29,7 @@ public class RequestInterceptor implements HandlerInterceptor {
     private final RequestContext requestContext;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+    public boolean preHandle(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) {
         var authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
         jwtUtils.extractPayload(authorization);
         this.setOwnerIdToContext();
@@ -46,6 +47,6 @@ public class RequestInterceptor implements HandlerInterceptor {
 
     private void setOwnerIdToContext() {
         var ownerId = jwtUtils.extractClaim(OWNER_ID_CLAIM).asString();
-        requestContext.profile = new Profile(UUID.fromString(ownerId));
+        requestContext.setProfile(new Profile(UUID.fromString(ownerId)));
     }
 }
