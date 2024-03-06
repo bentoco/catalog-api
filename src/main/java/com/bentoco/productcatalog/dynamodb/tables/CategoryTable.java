@@ -14,7 +14,7 @@ public class CategoryTable {
 
     private final static String CATEGORY_PREFIX = "CategoryID#";
 
-    static String prefixedId(String id) {
+    public static String prefixedId(String id) {
         return CATEGORY_PREFIX + id;
     }
 
