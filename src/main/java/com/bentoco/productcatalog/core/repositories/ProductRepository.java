@@ -5,6 +5,11 @@ import com.bentoco.productcatalog.core.model.Product;
 import java.util.UUID;
 
 public interface ProductRepository {
-    UUID upsert(Product product);
+
+    UUID insert(Product product);
+
+    void update(Product product);
+
     void delete(UUID productId);
+
 }

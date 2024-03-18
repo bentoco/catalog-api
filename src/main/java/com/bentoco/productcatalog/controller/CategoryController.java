@@ -2,6 +2,7 @@ package com.bentoco.productcatalog.controller;
 
 import com.bentoco.productcatalog.configurations.interfaces.AccessControl;
 import com.bentoco.productcatalog.controller.request.CategoryRequest;
+import com.bentoco.productcatalog.controller.request.UpdateCategoryRequest;
 import com.bentoco.productcatalog.core.model.Role;
 import com.bentoco.productcatalog.mappers.CategoryMapper;
 import com.bentoco.productcatalog.service.CategoryService;
@@ -13,6 +14,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,13 +41,26 @@ public class CategoryController {
     @AccessControl({Role.ADMIN, Role.OWNER})
     @Operation(tags = {"Category"})
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<?> upsertCategory(@Valid @RequestBody CategoryRequest categoryRequest, UriComponentsBuilder uriBuilder) {
-        logger.info("receive category request: {}", categoryRequest);
-        UUID categoryId = categoryService.upsertCategory(categoryMapper.toModel(categoryRequest));
+    public ResponseEntity<?> insertCategory(@Valid @RequestBody CategoryRequest categoryRequest, UriComponentsBuilder uriBuilder) {
+        logger.info("receive category insert request: {}", categoryRequest);
+        UUID categoryId = categoryService.insertCategory(categoryMapper.toModel(categoryRequest));
 
         URI locationUri = uriBuilder.path("/v1/categories/{id}").buildAndExpand(categoryId).toUri();
 
         return ResponseEntity.created(locationUri).build();
+    }
+
+    @PatchMapping("/{category_id}")
+    @AccessControl({Role.ADMIN, Role.OWNER})
+    @Operation(tags = {"Category"})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<?> updateCategory(
+            @PathVariable("category_id") String categoryId,
+            @Valid @RequestBody UpdateCategoryRequest categoryRequest
+    ) {
+        logger.info("receive category update request: {}", categoryRequest);
+        categoryService.updateCategory(categoryMapper.toModel(categoryRequest, UUID.fromString(categoryId)));
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping

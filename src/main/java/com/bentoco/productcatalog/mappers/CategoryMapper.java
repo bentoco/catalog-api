@@ -1,6 +1,7 @@
 package com.bentoco.productcatalog.mappers;
 
 import com.bentoco.productcatalog.controller.request.CategoryRequest;
+import com.bentoco.productcatalog.controller.request.UpdateCategoryRequest;
 import com.bentoco.productcatalog.core.model.Category;
 import com.bentoco.productcatalog.dynamodb.tables.CategoryTable;
 import org.mapstruct.Mapper;
@@ -16,7 +17,12 @@ public interface CategoryMapper {
     @Mapping(target = "id", expression = "java(UUID.randomUUID())")
     Category toModel(CategoryRequest categoryRequest);
 
+    @Mapping(target = "id", source = "categoryId")
+    Category toModel(UpdateCategoryRequest categoryRequest, UUID categoryId);
+
     @Mapping(target = "categoryId", source = "id")
     @Mapping(target = "ownerId", source = "owner.id")
     CategoryTable toTable(Category category);
+
+
 }

@@ -16,10 +16,16 @@ public class ProductService {
     private static final Logger logger = LogManager.getLogger(ProductService.class);
     private final ProductRepository productRepository;
 
-    public UUID upsertProduct(final Product product) {
+    public UUID insertProduct(final Product product) {
         logger.info("inserting product: {}", product);
-        return productRepository.upsert(product);
+        return productRepository.insert(product);
     }
+
+    public void updateProduct(final Product product) {
+        logger.info("updating product: {}", product);
+        productRepository.update(product);
+    }
+
 
     public void deleteProduct(final UUID productId) {
         logger.info("deleting product with id: {}", productId);

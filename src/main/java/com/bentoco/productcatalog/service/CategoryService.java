@@ -16,9 +16,14 @@ public class CategoryService {
     private static final Logger logger = LogManager.getLogger(CategoryService.class);
     private final CategoryRepository categoryRepository;
 
-    public UUID upsertCategory(final Category category) {
+    public UUID insertCategory(final Category category) {
         logger.info("inserting category: {}", category);
-        return categoryRepository.upsert(category);
+        return categoryRepository.insert(category);
+    }
+
+    public void updateCategory(final Category category) {
+        logger.info("updating category: {}", category);
+        categoryRepository.update(category);
     }
 
     public void deleteCategory(final UUID categoryId) {

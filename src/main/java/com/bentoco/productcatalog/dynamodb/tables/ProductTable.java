@@ -1,5 +1,6 @@
 package com.bentoco.productcatalog.dynamodb.tables;
 
+import com.bentoco.productcatalog.utils.StringUtils;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
@@ -13,11 +14,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortK
 @EqualsAndHashCode
 public class ProductTable {
 
-    static String PRODUCT_PREFIX = "ProductID#";
-
-    public static String prefixedId(String id) {
-        return PRODUCT_PREFIX + id;
-    }
+    public static final String PRODUCT_PREFIX = "ProductID#";
 
     private String productId;
     private String categoryId;
@@ -29,7 +26,7 @@ public class ProductTable {
     @DynamoDbPartitionKey
     @DynamoDbAttribute("ProductID")
     public String getProductId() {
-        return prefixedId(this.productId);
+        return StringUtils.prefixedId(this.productId, PRODUCT_PREFIX);
     }
 
     public void setProductId(String productId) {

@@ -20,7 +20,7 @@ http://localhost:8080/product-catalog/swagger-ui/index.html
 
 **1. Product Table:**
 
-- **Description:** The Product table stores information about various products registered by users. Each product has a unique identifier (ProductID) and is associated with an owner (OwnerID). Other attributes include title, description, price, and category.
+- **Description:** The Product table stores information about various products registered by users. Each product has a unique identifier (ProductID) and is associated with an owner (OwnerID). Other attributes include title, description, price, and categoryTable.
 
     - **Table Name:** Product
     - **Primary Key:** ProductID (Partition Key)
@@ -30,7 +30,7 @@ http://localhost:8080/product-catalog/swagger-ui/index.html
         - Description (String): Description of the product.
         - Price (Number): Price of the product.
         - OwnerID (String): ID of the owner of the product.
-        - CategoryID (String): ID of the category to which the product belongs.
+        - CategoryID (String): ID of the categoryTable to which the product belongs.
     - **Global Secondary Indexes:**
         - OwnerIDIndex:
             - **Index Name:** OwnerIDIndex
@@ -40,15 +40,15 @@ http://localhost:8080/product-catalog/swagger-ui/index.html
 
 **2. Category Table:**
 
-- **Description:** The Category table stores information about different categories registered by users. Each category has a unique identifier (CategoryID) and is associated with an owner (OwnerID). Attributes include title and description.
+- **Description:** The Category table stores information about different categories registered by users. Each categoryTable has a unique identifier (CategoryID) and is associated with an owner (OwnerID). Attributes include title and description.
 
     - **Table Name:** Category
     - **Primary Key:** CategoryID (Partition Key)
     - **Attributes:**
-        - CategoryID (String): Unique identifier for the category.
-        - Title (String): Title of the category.
-        - Description (String): Description of the category.
-        - OwnerID (String): ID of the owner of the category.
+        - CategoryID (String): Unique identifier for the categoryTable.
+        - Title (String): Title of the categoryTable.
+        - Description (String): Description of the categoryTable.
+        - OwnerID (String): ID of the owner of the categoryTable.
     - **Global Secondary Indexes:**
         - OwnerIDIndex:
             - **Index Name:** OwnerIDIndex
@@ -58,7 +58,7 @@ http://localhost:8080/product-catalog/swagger-ui/index.html
 
 **3. ProductCategory Mapping Table:**
 
-- **Description:** The ProductCategory mapping table establishes the association between products and categories. Each entry in this table represents a product-category relationship. The ProductID serves as the partition key, and the CategoryID serves as the sort key.
+- **Description:** The ProductCategory mapping table establishes the association between products and categories. Each entry in this table represents a product-categoryTable relationship. The ProductID serves as the partition key, and the CategoryID serves as the sort key.
 
     - **Table Name:** ProductCategoryMapping
     - **Primary Key:**

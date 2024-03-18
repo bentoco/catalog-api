@@ -7,47 +7,42 @@ import com.bentoco.productcatalog.core.model.Owner;
 import com.bentoco.productcatalog.core.repositories.CategoryRepository;
 import com.bentoco.productcatalog.dynamodb.tables.CategoryTable;
 import com.bentoco.productcatalog.mappers.CategoryMapper;
+import com.bentoco.productcatalog.utils.StringUtils;
+import io.awspring.cloud.dynamodb.DynamoDbTemplate;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Repository;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.Expression;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-import software.amazon.awssdk.enhanced.dynamodb.model.DeleteItemEnhancedRequest;
-import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
+import java.util.Objects;
 import java.util.UUID;
+
+import static com.bentoco.productcatalog.dynamodb.tables.CategoryTable.CATEGORY_PREFIX;
 
 @Repository
 @RequiredArgsConstructor
 public class CategoryPersistence implements CategoryRepository {
 
-    static final String CATEGORY_TABLE = "Category";
-    private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
+    private final DynamoDbTemplate dynamoDbTemplate;
     private final RequestContext requestContext;
 
     private final static CategoryMapper categoryMapper = CategoryMapper.INSTANCE;
     private final static Logger logger = LogManager.getLogger(CategoryPersistence.class);
 
     @Override
-    public UUID upsert(final Category category) {
+    public UUID insert(final Category category) {
+
         Owner owner = new Owner(requestContext.getProfile().ownerId());
         category.setOwner(owner);
 
         CategoryTable categoryTable = categoryMapper.toTable(category);
-        var categoryRequest = PutItemEnhancedRequest.builder(CategoryTable.class)
-                .item(categoryTable)
-                .build();
 
         logger.info("inserting category item: {}", categoryTable);
         try {
-            this.getTable().putItem(categoryRequest);
-            return category.getId();
+            var result = dynamoDbTemplate.save(categoryTable);
+            return StringUtils.removePrefix(result.getCategoryId(), CATEGORY_PREFIX);
         } catch (DynamoDbException e) {
             logger.error("error creating category item: {}", e.getMessage());
             throw new DynamoDbOperationsErrorException(e.getMessage());
@@ -55,24 +50,32 @@ public class CategoryPersistence implements CategoryRepository {
     }
 
     @Override
-    public void delete(UUID categoryId) {
-        String ownerId = String.valueOf(requestContext.getProfile().ownerId());
-        String partitionKey = CategoryTable.prefixedId(String.valueOf(categoryId));
-        var deleteRequest = DeleteItemEnhancedRequest.builder()
-                .conditionExpression(Expression.builder()
-                        .expression("OwnerID = :owner_id")
-                        .putExpressionValue(":owner_id", AttributeValue.fromS(ownerId)).build())
-                .key(k -> k.partitionValue(partitionKey))
-                .build();
+    public void update(final Category category) {
+        Key key = getKey(category.getId());
+        var entity = dynamoDbTemplate.load(key, CategoryTable.class);
+        if (Objects.isNull(entity)) {
+            throw new DynamoDbOperationsErrorException("item not found");
+        }
+        entity.setTitle(category.getTitle());
+        entity.setDescription(category.getDescription());
+        dynamoDbTemplate.save(entity);
+    }
+
+    @Override
+    public void delete(final UUID categoryId) {
+        Key key = getKey(categoryId);
         try {
-            this.getTable().deleteItem(deleteRequest);
-        } catch (ConditionalCheckFailedException e) {
+            dynamoDbTemplate.delete(key, CategoryTable.class);
+        } catch (Exception e) {
             logger.error("error deleting category item: {}", e.getMessage());
             throw new DynamoDbOperationsErrorException(e.getMessage());
         }
     }
 
-    private DynamoDbTable<CategoryTable> getTable() {
-        return dynamoDbEnhancedClient.table(CATEGORY_TABLE, TableSchema.fromBean(CategoryTable.class));
+    private static Key getKey(UUID categoryId) {
+        String partitionKey = StringUtils.prefixedId(categoryId.toString(), CATEGORY_PREFIX);
+        return Key.builder()
+                .partitionValue(partitionKey)
+                .build();
     }
 }
