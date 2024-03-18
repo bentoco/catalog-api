@@ -1,5 +1,5 @@
 {
-  "TableName": "Product",
+  "TableName": "product_table",
   "KeySchema": [
     { "AttributeName": "ProductID", "KeyType": "HASH" }
   ],

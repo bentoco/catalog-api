@@ -6,7 +6,9 @@ import java.util.UUID;
 
 public interface CategoryRepository {
 
-    UUID upsert(Category category);
+    UUID insert(Category category);
+
+    void update(Category category);
 
     void delete(UUID categoryId);
 }

@@ -1,5 +1,5 @@
 {
-  "TableName": "ProductCategoryMapping",
+  "TableName": "product_category_mapping",
   "KeySchema": [
     { "AttributeName": "ProductID", "KeyType": "HASH" },
     { "AttributeName": "CategoryID", "KeyType": "RANGE" }

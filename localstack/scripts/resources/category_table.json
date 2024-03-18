@@ -1,5 +1,5 @@
 {
-  "TableName": "Category",
+  "TableName": "category_table",
   "KeySchema": [
     { "AttributeName": "CategoryID", "KeyType": "HASH" }
   ],

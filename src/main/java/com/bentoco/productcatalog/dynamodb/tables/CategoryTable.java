@@ -1,9 +1,11 @@
 package com.bentoco.productcatalog.dynamodb.tables;
 
+import com.bentoco.productcatalog.utils.StringUtils;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
 
@@ -12,21 +14,17 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortK
 @EqualsAndHashCode
 public class CategoryTable {
 
-    private final static String CATEGORY_PREFIX = "CategoryID#";
-
-    public static String prefixedId(String id) {
-        return CATEGORY_PREFIX + id;
-    }
+    public final static String CATEGORY_PREFIX = "CategoryID#";
 
     private String categoryId;
     private String ownerId;
     private String title;
     private String description;
 
-    @DynamoDbSortKey
+    @DynamoDbPartitionKey
     @DynamoDbAttribute("CategoryID")
     public String getCategoryId() {
-        return prefixedId(this.categoryId);
+        return StringUtils.prefixedId(this.categoryId, CATEGORY_PREFIX);
     }
 
     public void setCategoryId(String categoryId) {

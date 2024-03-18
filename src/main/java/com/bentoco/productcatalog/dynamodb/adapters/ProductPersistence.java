@@ -5,49 +5,41 @@ import com.bentoco.productcatalog.controller.exception.DynamoDbOperationsErrorEx
 import com.bentoco.productcatalog.core.model.Owner;
 import com.bentoco.productcatalog.core.model.Product;
 import com.bentoco.productcatalog.core.repositories.ProductRepository;
+import com.bentoco.productcatalog.dynamodb.tables.CategoryTable;
 import com.bentoco.productcatalog.dynamodb.tables.ProductTable;
 import com.bentoco.productcatalog.mappers.ProductMapper;
+import com.bentoco.productcatalog.utils.StringUtils;
+import io.awspring.cloud.dynamodb.DynamoDbTemplate;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Repository;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.Expression;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-import software.amazon.awssdk.enhanced.dynamodb.model.DeleteItemEnhancedRequest;
-import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
+import java.util.Objects;
 import java.util.UUID;
+
+import static com.bentoco.productcatalog.dynamodb.tables.ProductTable.PRODUCT_PREFIX;
 
 @Repository
 @RequiredArgsConstructor
 public class ProductPersistence implements ProductRepository {
 
-    static final String PRODUCT_TABLE = "Product";
-    private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
+    private final DynamoDbTemplate dynamoDbTemplate;
     private final RequestContext requestContext;
 
     private final static ProductMapper productMapper = ProductMapper.INSTANCE;
     private final static Logger logger = LogManager.getLogger(ProductPersistence.class);
 
     @Override
-    public UUID upsert(final Product product) {
-        Owner owner = new Owner(requestContext.getProfile().ownerId());
-        product.setOwner(owner);
-
-        ProductTable productTable = productMapper.toTable(product);
-        var productRequest = PutItemEnhancedRequest.builder(ProductTable.class)
-                .item(productTable)
-                .build();
-
+    public UUID insert(final Product product) {
+        var owner = new Owner(requestContext.getProfile().ownerId());
+        var productTable = productMapper.toTable(product.withOwner(owner));
         logger.info("inserting product item: {}", productTable);
         try {
-            this.getTable().putItem(productRequest);
-            return product.getId();
+            var result = dynamoDbTemplate.save(productTable);
+            return StringUtils.removePrefix(result.getProductId(), PRODUCT_PREFIX);
         } catch (DynamoDbException e) {
             logger.error("error inserting product item: {}", e.getMessage());
             throw new DynamoDbOperationsErrorException(e.getMessage());
@@ -55,24 +47,33 @@ public class ProductPersistence implements ProductRepository {
     }
 
     @Override
+    public void update(Product product) {
+        Key key = getKey(product.getId());
+        var entity = dynamoDbTemplate.load(key, ProductTable.class);
+        if (Objects.isNull(entity)) {
+            throw new DynamoDbOperationsErrorException("item not found.");
+        }
+        entity.setTitle(product.getTitle());
+        entity.setDescription(product.getDescription());
+        entity.setPrice(product.getPrice());
+        dynamoDbTemplate.save(entity);
+    }
+
+    @Override
     public void delete(final UUID productId) {
-        String ownerId = String.valueOf(requestContext.getProfile().ownerId());
-        String partitionKey = ProductTable.prefixedId(String.valueOf(productId));
-        var deleteRequest = DeleteItemEnhancedRequest.builder()
-                .conditionExpression(Expression.builder()
-                        .expression("OwnerID = :owner_id")
-                        .putExpressionValue(":owner_id", AttributeValue.fromS(ownerId)).build())
-                .key(k -> k.partitionValue(partitionKey))
-                .build();
+        Key key = getKey(productId);
         try {
-            this.getTable().deleteItem(deleteRequest);
-        } catch (ConditionalCheckFailedException e) {
+            dynamoDbTemplate.delete(key, CategoryTable.class);
+        } catch (Exception e) {
             logger.error("error deleting product item: {}", e.getMessage());
             throw new DynamoDbOperationsErrorException(e.getMessage());
         }
     }
 
-    private DynamoDbTable<ProductTable> getTable() {
-        return dynamoDbEnhancedClient.table(PRODUCT_TABLE, TableSchema.fromBean(ProductTable.class));
+    private static Key getKey(UUID productId) {
+        String partitionKey = StringUtils.prefixedId(productId.toString(), PRODUCT_PREFIX);
+        return Key.builder()
+                .partitionValue(partitionKey)
+                .build();
     }
 }
