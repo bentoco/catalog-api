@@ -11,8 +11,8 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 import java.net.URI;
 
-@Profile("default") //todo: change-it
- @Configuration
+@Profile("default")
+@Configuration
 public class DynamoDbLocalConfiguration {
 
     private final URI URI_LOCALSTACK = URI.create("http://localhost:4566");
