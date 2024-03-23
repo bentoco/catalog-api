@@ -1,9 +1,7 @@
 package com.bentoco.productcatalog.dynamodb.adapters;
 
-import com.bentoco.productcatalog.configurations.middlewares.RequestContext;
 import com.bentoco.productcatalog.controller.exception.DynamoDbOperationsErrorException;
 import com.bentoco.productcatalog.core.model.Category;
-import com.bentoco.productcatalog.core.model.Owner;
 import com.bentoco.productcatalog.core.repositories.CategoryRepository;
 import com.bentoco.productcatalog.dynamodb.tables.CategoryTable;
 import com.bentoco.productcatalog.dynamodb.utils.DynamoDbUtils;
@@ -35,7 +33,6 @@ public class CategoryPersistence implements CategoryRepository {
 
     private final DynamoDbTemplate dynamoDbTemplate;
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
-    private final RequestContext requestContext;
     private final DynamoDbTableSchemaResolver tableSchemaResolver;
     private final DefaultDynamoDbTableNameResolver tableNameResolver;
 
@@ -44,8 +41,6 @@ public class CategoryPersistence implements CategoryRepository {
 
     @Override
     public UUID insert(Category category) {
-        Owner owner = new Owner(requestContext.getProfile().ownerId());
-        category.setOwner(owner);
         CategoryTable categoryItem = categoryMapper.toTable(category);
 
         logger.info("inserting category item: {}", categoryItem);
