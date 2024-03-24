@@ -11,14 +11,12 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 import java.net.URI;
 
+import static com.bentoco.productcatalog.constants.AwsConstants.STATIC_CREDENTIALS;
+import static com.bentoco.productcatalog.constants.AwsConstants.URI_LOCALSTACK;
+
 @Profile("default")
 @Configuration
 public class DynamoDbLocalConfiguration {
-
-    private final URI URI_LOCALSTACK = URI.create("http://localhost:4566");
-    private final StaticCredentialsProvider STATIC_CREDENTIALS = StaticCredentialsProvider.create(
-            AwsBasicCredentials.create("default_access_key", "default_secret_key")
-    );
 
     @Bean
     public DynamoDbClient getDynamoDbClient() {
