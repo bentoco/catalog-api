@@ -11,7 +11,9 @@ aws sqs create-queue --endpoint-url=http://localhost:4566 \
    --queue-name catalog_emit_dlq
 
 aws sqs set-queue-attributes --endpoint-url=http://localhost:4566 \
-   --queue-url http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/input-queue \
-   --attributes '{ "RedrivePolicy": "{\"deadLetterTargetArn\":\"arn:aws:sqs:us-east-1:000000000000:dead-letter-queue\",\"maxReceiveCount\":\"1\"}"}'
+   --profile localstack \
+   --region sa-east-1 \
+   --queue-url http://sqs.sa-east-1.localhost.localstack.cloud:4566/000000000000/catalog_emit \
+   --attributes '{ "RedrivePolicy": "{\"deadLetterTargetArn\":\"arn:aws:sqs:sa-east-1:000000000000:catalog_emit_dlq\",\"maxReceiveCount\":\"1\"}"}'
 
 aws sqs list-queues --endpoint-url=http://localhost:4566 --profile localstack --region sa-east-1
