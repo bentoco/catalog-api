@@ -6,10 +6,10 @@ server:
 spring:
   jackson:
     property-naming-strategy: SNAKE_CASE
-  cloud:
-    aws:
-      sqs:
-        enabled: true
+#  cloud:
+#    aws:
+#      sqs:
+#        enabled: true
 
 security:
   jwt-secret: change-it
