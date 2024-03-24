@@ -61,7 +61,7 @@ public class CategoryPersistence implements CategoryRepository {
 
         return TransactWriteItemsEnhancedRequest.builder()
                 .addPutItem(this.getTable(), categoryItem)
-                .addConditionCheck(this.getTable(), conditionCheck)
+//                .addConditionCheck(this.getTable(), conditionCheck)
                 .build();
     }
 
