@@ -5,13 +5,15 @@
   ],
   "AttributeDefinitions": [
     { "AttributeName": "CategoryID", "AttributeType": "S" },
-    { "AttributeName": "OwnerID", "AttributeType": "S" }
+    { "AttributeName": "OwnerID", "AttributeType": "S" },
+    { "AttributeName": "Title", "AttributeType": "S" }
   ],
   "GlobalSecondaryIndexes": [
     {
-      "IndexName": "OwnerIDIndex",
+      "IndexName": "TitleOwnerIDIndex",
       "KeySchema": [
-        { "AttributeName": "OwnerID", "KeyType": "HASH" }
+        { "AttributeName": "Title", "KeyType": "HASH" },
+        { "AttributeName": "OwnerID", "KeyType": "RANGE" }
       ],
       "Projection": {
         "ProjectionType": "ALL"

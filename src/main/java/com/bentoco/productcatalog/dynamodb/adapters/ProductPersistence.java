@@ -100,7 +100,7 @@ public class ProductPersistence implements ProductRepository {
         DynamoDbTable<ProductCategoryMapping> productCategoryDbTable = getTable(ProductCategoryMapping.class);
 
         Key key = DynamoDbUtils.getKey(productItem.getProductId(), PRODUCT_PREFIX);
-        Expression expression = DynamoDbUtils.getMustBeUniqueTitleAndOwnerIdExpression(productItem.getTitle(), productItem.getOwnerId());
+        Expression expression = DynamoDbUtils.buildMustBeUniqueTitleAndOwnerIdExpression(productItem.getTitle(), productItem.getOwnerId());
         ConditionCheck<ProductTable> conditionCheck = DynamoDbUtils.getConditionCheck(key, expression);
 
         TransactWriteItemsEnhancedRequest.Builder requestBuilder = TransactWriteItemsEnhancedRequest.builder();

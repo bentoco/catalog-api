@@ -32,13 +32,16 @@ public class CategoryService {
     }
 
     public void updateCategory(final Category category) {
+        Owner owner = new Owner(requestContext.getProfile().ownerId());
+        category.setOwner(owner);
         logger.info("updating category: {}", category);
         categoryRepository.update(category);
     }
 
     public void deleteCategory(final UUID categoryId) {
+        Owner owner = new Owner(requestContext.getProfile().ownerId());
         logger.info("deleting category with id: {}", categoryId);
-        categoryRepository.delete(categoryId);
+        categoryRepository.delete(categoryId, owner.id());
     }
 }
 

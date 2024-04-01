@@ -7,6 +7,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttri
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondarySortKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
 
 @ToString
@@ -32,6 +33,7 @@ public class CategoryTable {
     }
 
     @DynamoDbAttribute("OwnerID")
+    @DynamoDbSecondaryPartitionKey(indexNames = {"OwnerIDIndex", "TitleOwnerIDIndex"})
     public String getOwnerId() {
         return ownerId;
     }
@@ -41,6 +43,7 @@ public class CategoryTable {
     }
 
     @DynamoDbAttribute("Title")
+    @DynamoDbSecondarySortKey(indexNames = "TitleOwnerIDIndex")
     public String getTitle() {
         return title;
     }
@@ -56,15 +59,5 @@ public class CategoryTable {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    @DynamoDbSortKey
-    @DynamoDbSecondaryPartitionKey(indexNames = "OwnerIDIndex")
-    public String getOwnerIDForIndex() {
-        return this.ownerId;
-    }
-
-    public void setOwnerIDForIndex(String ownerId) {
-        this.ownerId = ownerId;
     }
 }
