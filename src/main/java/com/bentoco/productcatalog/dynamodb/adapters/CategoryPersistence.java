@@ -20,9 +20,7 @@ import software.amazon.awssdk.enhanced.dynamodb.model.TransactDeleteItemEnhanced
 import software.amazon.awssdk.enhanced.dynamodb.model.TransactPutItemEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.TransactUpdateItemEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
-import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
-import software.amazon.awssdk.services.dynamodb.model.TransactionCanceledException;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -31,7 +29,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CategoryPersistence implements CategoryRepository {
 
-    private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
+    private final DynamoDbEnhancedClient enhancedClient;
     private final DynamoDbTableSchemaResolver tableSchemaResolver;
     private final DefaultDynamoDbTableNameResolver tableNameResolver;
 
@@ -53,6 +51,11 @@ public class CategoryPersistence implements CategoryRepository {
 
     @Override
     public void update(Category category) {
+        if (Objects.isNull(category.getTitle()) && Objects.isNull(category.getDescription())) {
+            logger.error("update operation interrupted, title and description cannot be null in the same request.");
+            return;
+        }
+
         try {
             doTransactionUpdate(categoryMapper.toTable(category));
         } catch (DynamoDbException e) {
@@ -73,7 +76,7 @@ public class CategoryPersistence implements CategoryRepository {
     }
 
     private DynamoDbTable<CategoriesTable> getTable() {
-        return dynamoDbEnhancedClient.table(
+        return enhancedClient.table(
                 tableNameResolver.resolve(CategoriesTable.class),
                 tableSchemaResolver.resolve(CategoriesTable.class)
         );
@@ -84,7 +87,7 @@ public class CategoryPersistence implements CategoryRepository {
         String uniquenessPk = DynamoDbUtils.getUniquenessPk(categoryItem.getSk(), categoryItem.getTitle());
         CategoriesTable uniquenessItem = new CategoriesTable(uniquenessPk, categoryItem.getSk());
 
-        dynamoDbEnhancedClient.transactWriteItems(i -> i
+        enhancedClient.transactWriteItems(i -> i
                 .addPutItem(this.getTable(), TransactPutItemEnhancedRequest.builder(CategoriesTable.class)
                         .item(categoryItem)
                         .conditionExpression(expression)
@@ -97,19 +100,35 @@ public class CategoryPersistence implements CategoryRepository {
 
     private void doTransactionUpdate(CategoriesTable categoryItem) {
         try {
-            String ownerIdSk = categoryItem.getSk();
-            String oldTitle = getOldTitleFromDatabase(categoryItem.getPk(), ownerIdSk);
-            String oldUniquePk = DynamoDbUtils.getUniquenessPk(ownerIdSk, oldTitle);
-            String newUniquePk = DynamoDbUtils.getUniquenessPk(ownerIdSk, categoryItem.getTitle());
-
-            dynamoDbEnhancedClient.transactWriteItems(i -> i
-                    .addUpdateItem(this.getTable(), this.updateItemRequest(categoryItem))
-                    .addDeleteItem(this.getTable(), this.deleteItemRequest(oldUniquePk, ownerIdSk))
-                    .addPutItem(this.getTable(), this.putItemRequest(newUniquePk, ownerIdSk))
-            );
-        } catch (TransactionCanceledException | ConditionalCheckFailedException e) {
-            logger.error("transaction failed: " + e.getMessage());
+            if (Objects.isNull(categoryItem.getTitle())) {
+                updateItem(categoryItem);
+            } else {
+                executeTransaction(categoryItem);
+            }
+        } catch (DynamoDbException e) {
+            logger.error("update failed: " + e.getMessage());
+            throw new DynamoDbOperationsErrorException(e.getMessage());
         }
+    }
+
+    private void updateItem(CategoriesTable categoryItem) {
+        this.getTable().updateItem(UpdateItemEnhancedRequest.builder(CategoriesTable.class)
+                .item(categoryItem)
+                .ignoreNulls(Boolean.TRUE)
+                .build());
+    }
+
+    private void executeTransaction(CategoriesTable categoryItem) {
+        String ownerIdSk = categoryItem.getSk();
+        String oldTitle = getOldTitleFromDatabase(categoryItem.getPk(), ownerIdSk);
+        String oldUniquePk = DynamoDbUtils.getUniquenessPk(ownerIdSk, oldTitle);
+        String newUniquePk = DynamoDbUtils.getUniquenessPk(ownerIdSk, categoryItem.getTitle());
+
+        enhancedClient.transactWriteItems(i -> i
+                .addUpdateItem(this.getTable(), this.transactUpdateItemRequest(categoryItem))
+                .addDeleteItem(this.getTable(), this.transactDeleteItemRequest(oldUniquePk, ownerIdSk))
+                .addPutItem(this.getTable(), this.transactPutItemRequest(newUniquePk, ownerIdSk))
+        );
     }
 
     private String getOldTitleFromDatabase(String pk, String sk) {
@@ -125,14 +144,14 @@ public class CategoryPersistence implements CategoryRepository {
         return item.getTitle();
     }
 
-    private TransactUpdateItemEnhancedRequest<CategoriesTable> updateItemRequest(CategoriesTable updateItem) {
+    private TransactUpdateItemEnhancedRequest<CategoriesTable> transactUpdateItemRequest(CategoriesTable updateItem) {
         return TransactUpdateItemEnhancedRequest.builder(CategoriesTable.class)
                 .item(updateItem)
-                .ignoreNulls(true)
+                .ignoreNulls(Boolean.TRUE)
                 .build();
     }
 
-    private TransactDeleteItemEnhancedRequest deleteItemRequest(String pk, String sk) {
+    private TransactDeleteItemEnhancedRequest transactDeleteItemRequest(String pk, String sk) {
         return TransactDeleteItemEnhancedRequest.builder()
                 .key(Key.builder()
                         .partitionValue(pk)
@@ -141,7 +160,7 @@ public class CategoryPersistence implements CategoryRepository {
                 .build();
     }
 
-    private TransactPutItemEnhancedRequest<CategoriesTable> putItemRequest(String newUniquePk, String ownerIdSk) {
+    private TransactPutItemEnhancedRequest<CategoriesTable> transactPutItemRequest(String newUniquePk, String ownerIdSk) {
         CategoriesTable categoryPutItem = new CategoriesTable(newUniquePk, ownerIdSk); // todo: add builder
         Expression expression = DynamoDbUtils.buildMustBeUniqueTitleAndOwnerIdExpression();
 
