@@ -101,6 +101,22 @@ public class CategoryPersistence implements CategoryRepository {
         );
     }
 
+    @Override
+    public void delete(UUID categoryId, UUID ownerId) {
+        try {
+            String titleOld = getOldTitleFromDatabase(categoryId.toString(), ownerId.toString());
+            String uniquePkOld = DynamoDbUtils.getUniquenessPk(ownerId.toString(), titleOld);
+
+            enhancedClient.transactWriteItems(i -> i
+                    .addDeleteItem(this.getTable(), transactDeleteItemRequest(categoryId.toString(), ownerId.toString()))
+                    .addDeleteItem(this.getTable(), transactDeleteItemRequest(uniquePkOld, ownerId.toString()))
+            );
+        } catch (Exception e) {
+            logger.error("error deleting category item: {}", e.getMessage());
+            throw new DynamoDbOperationsErrorException(e.getMessage());
+        }
+    }
+
     private String getOldTitleFromDatabase(String pk, String sk) {
         DynamoDbTable<CategoriesTable> table = this.getTable();
         CategoriesTable item = table.getItem(Key.builder()
@@ -113,17 +129,6 @@ public class CategoryPersistence implements CategoryRepository {
             throw new DynamoDbOperationsErrorException("item not found to these keys");
         }
         return item.getTitle();
-    }
-
-    @Override
-    public void delete(UUID categoryId, UUID ownerId) {
-        try {
-            CategoriesTable categoriesTable = buildCategoriesTable(categoryId.toString(), ownerId.toString());
-            this.getTable().deleteItem(categoriesTable);
-        } catch (Exception e) {
-            logger.error("error deleting category item: {}", e.getMessage());
-            throw new DynamoDbOperationsErrorException(e.getMessage());
-        }
     }
 
     private TransactUpdateItemEnhancedRequest<CategoriesTable> transactUpdateItemRequest(CategoriesTable updateItem) {
