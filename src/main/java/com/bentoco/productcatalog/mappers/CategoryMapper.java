@@ -24,5 +24,4 @@ public interface CategoryMapper {
     @Mapping(target = "sk", source = "owner.id")
     CategoriesTable toTable(Category category);
 
-
 }
