@@ -40,7 +40,7 @@ http://localhost:8080/product-catalog/swagger-ui/index.html
 
 **2. Category Table:**
 
-- **Description:** The Category table stores information about different categories registered by users. Each categoryTable has a unique identifier (CategoryID) and is associated with an owner (OwnerID). Attributes include title and description.
+- **Description:** The Category table stores information about different category registered by users. Each categoryTable has a unique identifier (CategoryID) and is associated with an owner (OwnerID). Attributes include title and description.
 
     - **Table Name:** Category
     - **Primary Key:** CategoryID (Partition Key)
@@ -58,18 +58,18 @@ http://localhost:8080/product-catalog/swagger-ui/index.html
 
 **3. ProductCategory Mapping Table:**
 
-- **Description:** The ProductCategory mapping table establishes the association between products and categories. Each entry in this table represents a product-categoryTable relationship. The ProductID serves as the partition key, and the CategoryID serves as the sort key.
+- **Description:** The ProductCategory mapping table establishes the association between products and category. Each entry in this table represents a product-categoryTable relationship. The ProductID serves as the partition key, and the CategoryID serves as the sort key.
 
     - **Table Name:** ProductCategoryMapping
     - **Primary Key:**
         - Partition Key: ProductID
         - Sort Key: CategoryID
-    - **Attributes:** None (The table serves as a mapping between products and categories)
+    - **Attributes:** None (The table serves as a mapping between products and category)
     - **Provisioned Throughput:** 5 Read Capacity Units, 5 Write Capacity Units
 
 **Usage:**
-- The Product and Category tables store detailed information about products and categories respectively.
-- The ProductCategory mapping table facilitates the association between products and categories.
-- Users can efficiently query products or categories by their owner using the provided Global Secondary Indexes.
+- The Product and Category tables store detailed information about products and category respectively.
+- The ProductCategory mapping table facilitates the association between products and category.
+- Users can efficiently query products or category by their owner using the provided Global Secondary Indexes.
 
 **Note:** Adjust the provisioned throughput (Read and Write Capacity Units) based on anticipated workload and access patterns. Additionally, consider implementing auto-scaling for more flexible capacity management. 

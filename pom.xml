@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repositories -->
 	</parent>
 	<groupId>com.bentoco</groupId>
-	<artifactId>product-catalog</artifactId>
+	<artifactId>catalog</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>catalog</name>
+	<name>catalog-api</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
 		<java.version>21</java.version>
@@ -109,6 +109,13 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<version>3.2.3</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>localstack</artifactId>
+			<version>1.19.7</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

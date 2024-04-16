@@ -1,5 +1,5 @@
 {
-  "TableName": "categories_table",
+  "TableName": "catalog",
   "KeySchema": [
     { "AttributeName": "pk", "KeyType": "HASH" },
     { "AttributeName": "sk", "KeyType": "RANGE" }
