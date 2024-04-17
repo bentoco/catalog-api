@@ -4,6 +4,7 @@ import com.bentoco.catalog.controller.exception.DynamoDbOperationsErrorException
 import com.bentoco.catalog.core.model.Category;
 import com.bentoco.catalog.core.repositories.CategoryRepository;
 import com.bentoco.catalog.dynamodb.utils.DynamoDbUtils;
+import com.bentoco.catalog.model.CategoryImmutableBeanItem;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,8 +36,14 @@ public class CategoryPersistence implements CategoryRepository {
     @Override
     public String insert(Category categoryItem) {
         logger.info("inserting category item: {}", categoryItem);
+        CategoryImmutableBeanItem categoryImmutableBeanItem = CategoryImmutableBeanItem.builder()
+                .pk(categoryItem.getPk())
+                .sk(categoryItem.getSk())
+                .title(categoryItem.getTitle())
+                .description(categoryItem.getDescription())
+                .build();
         try {
-            doInsertionTransaction(categoryItem);
+            doInsertionTransaction(categoryImmutableBeanItem);
             return categoryItem.getPk();
         } catch (DynamoDbException e) {
             logger.error("error creating category item: {}", e.getMessage());
@@ -49,6 +56,14 @@ public class CategoryPersistence implements CategoryRepository {
         enhancedClient.transactWriteItems(i -> i
                 .addPutItem(this.getTable(), this.transactPutItemRequest(categoryItem))
                 .addPutItem(this.getTable(), this.transactPutItemRequest(uniquePk, categoryItem.getSk()))
+        );
+    }
+
+    private void doInsertionTransaction(CategoryImmutableBeanItem categoryItem) {
+        String uniquePk = DynamoDbUtils.getUniquenessPk(categoryItem.getSk(), categoryItem.getTitle());
+        enhancedClient.transactWriteItems(i -> i
+                .addPutItem(this.getImmutableTable(), this.transactPutItemRequest(categoryItem))
+                .addPutItem(this.getImmutableTable(), this.transactPutImmutableItemRequest(uniquePk, categoryItem.getSk()))
         );
     }
 
@@ -144,8 +159,23 @@ public class CategoryPersistence implements CategoryRepository {
                 .build();
     }
 
+    private TransactPutItemEnhancedRequest<CategoryImmutableBeanItem> transactPutImmutableItemRequest(String pk, String sk) {
+        CategoryImmutableBeanItem categoryPutItem = buildCategoryImmutableTable(pk, sk);
+        return TransactPutItemEnhancedRequest.builder(CategoryImmutableBeanItem.class)
+                .item(categoryPutItem)
+                .conditionExpression(MUST_BE_UNIQUE_TITLE_AND_OWNER_ID_EXPRESSION)
+                .build();
+    }
+
     private TransactPutItemEnhancedRequest<Category> transactPutItemRequest(Category categoryItem) {
         return TransactPutItemEnhancedRequest.builder(Category.class)
+                .item(categoryItem)
+                .conditionExpression(MUST_BE_UNIQUE_TITLE_AND_OWNER_ID_EXPRESSION)
+                .build();
+    }
+
+    private TransactPutItemEnhancedRequest<CategoryImmutableBeanItem> transactPutItemRequest(CategoryImmutableBeanItem categoryItem) {
+        return TransactPutItemEnhancedRequest.builder(CategoryImmutableBeanItem.class)
                 .item(categoryItem)
                 .conditionExpression(MUST_BE_UNIQUE_TITLE_AND_OWNER_ID_EXPRESSION)
                 .build();
@@ -158,7 +188,18 @@ public class CategoryPersistence implements CategoryRepository {
                 .build();
     }
 
+    private static CategoryImmutableBeanItem buildCategoryImmutableTable(String pk, String sk) {
+        return CategoryImmutableBeanItem.builder()
+                .pk(pk)
+                .sk(sk)
+                .build();
+    }
+
     public DynamoDbTable<Category> getTable() {
         return enhancedClient.table(CATEGORIES_TABLE_NAME, TableSchema.fromImmutableClass(Category.class));
+    }
+
+    public DynamoDbTable<CategoryImmutableBeanItem> getImmutableTable(){
+        return enhancedClient.table("catalog", TableSchema.fromImmutableClass(CategoryImmutableBeanItem.class));
     }
 }
