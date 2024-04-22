@@ -1,13 +1,14 @@
 package com.bentoco.catalog.core.repositories;
 
-import com.bentoco.catalog.core.model.Product;
+import com.bentoco.catalog.model.ProductImmutableBeanItem;
 
 public interface ProductRepository {
 
-    String insert(Product product);
+    String insert(ProductImmutableBeanItem product);
 
-    void update(Product product);
+    void update(ProductImmutableBeanItem product);
 
     void delete(String productId, String ownerId);
 
+    Boolean hasAnyRelationship(String categoryId);
 }

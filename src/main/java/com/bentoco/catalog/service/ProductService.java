@@ -1,7 +1,7 @@
 package com.bentoco.catalog.service;
 
-import com.bentoco.catalog.core.model.Product;
 import com.bentoco.catalog.core.repositories.ProductRepository;
+import com.bentoco.catalog.model.ProductImmutableBeanItem;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,12 +14,12 @@ public class ProductService {
     private static final Logger logger = LogManager.getLogger(ProductService.class);
     private final ProductRepository productRepository;
 
-    public String insertProduct(final Product product) {
+    public String insertProduct(final ProductImmutableBeanItem product) {
         logger.info("inserting product: {}", product);
         return productRepository.insert(product);
     }
 
-    public void updateProduct(final Product product) {
+    public void updateProduct(final ProductImmutableBeanItem product) {
         logger.info("updating product: {}", product);
         productRepository.update(product);
     }

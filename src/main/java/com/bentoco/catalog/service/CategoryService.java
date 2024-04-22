@@ -1,7 +1,7 @@
 package com.bentoco.catalog.service;
 
-import com.bentoco.catalog.core.model.Category;
 import com.bentoco.catalog.core.repositories.CategoryRepository;
+import com.bentoco.catalog.model.CategoryImmutableBeanItem;
 import com.bentoco.catalog.sqs.CatalogChangePublisher;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
@@ -17,14 +17,14 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final CatalogChangePublisher catalogChangePublisher;
 
-    public String insertCategory(final Category category) {
+    public String insertCategory(final CategoryImmutableBeanItem category) {
         logger.info("inserting category: {}", category);
         String categoryId = categoryRepository.insert(category);
         catalogChangePublisher.send(category.getSk());
         return categoryId;
     }
 
-    public void updateCategory(final Category category) {
+    public void updateCategory(final CategoryImmutableBeanItem category) {
         logger.info("updating category: {}", category);
         categoryRepository.update(category);
     }

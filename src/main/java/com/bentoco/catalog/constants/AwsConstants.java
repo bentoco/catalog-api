@@ -7,8 +7,9 @@ import java.net.URI;
 
 public class AwsConstants {
 
-    public static final String PREFIX_CATEGORY_TITLE = "#title#";
-    public static final String PREFIX_CATEGORY_OWNER_ID = "owner_id#";
+    public static final String PREFIX_CATEGORY_TITLE = "#TITLE#";
+    public static final String PREFIX_OWNER = "OWNER#";
+    public static final String PREFIX_CATEGORY = "CATEGORY#";
     public static final String CATEGORIES_TABLE_NAME = "categories";
     public static final String PRODUCT_TABLE_NAME = "products";
     public static final URI URI_LOCALSTACK = URI.create("http://localhost:4566");

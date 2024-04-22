@@ -6,7 +6,23 @@
   ],
   "AttributeDefinitions": [
     { "AttributeName": "pk", "AttributeType": "S" },
-    { "AttributeName": "sk", "AttributeType": "S" }
+    { "AttributeName": "sk", "AttributeType": "S" },
+    { "AttributeName": "category_id", "AttributeType":  "S"}
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "category_id_index",
+      "KeySchema": [
+        { "AttributeName": "category_id", "KeyType": "HASH" }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+      }
+    }
   ],
   "ProvisionedThroughput": {
     "ReadCapacityUnits": 5,

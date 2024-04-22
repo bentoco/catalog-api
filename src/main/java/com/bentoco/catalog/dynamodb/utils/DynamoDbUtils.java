@@ -11,7 +11,7 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.bentoco.catalog.constants.AwsConstants.PREFIX_CATEGORY_OWNER_ID;
+import static com.bentoco.catalog.constants.AwsConstants.PREFIX_OWNER;
 import static com.bentoco.catalog.constants.AwsConstants.PREFIX_CATEGORY_TITLE;
 
 public class DynamoDbUtils {
@@ -68,10 +68,10 @@ public class DynamoDbUtils {
     }
 
     /**
-     * This is an example of result: owner_id#1a2b3c#title#Foo
+     * This is an example of result: OWNER#1a2b3c#TITLE#Foo
      */
-    public static String getUniquenessPk(String ownerId, String title) {
-        return STR."\{PREFIX_CATEGORY_OWNER_ID}\{ownerId}\{PREFIX_CATEGORY_TITLE}\{title}" ;
+    public static String getUniquenessConstraint(String key, String title) {
+        return STR. "\{ key }\{ PREFIX_CATEGORY_TITLE }\{ title }" ;
     }
 
     public static <T extends AbstractModel> TransactPutItemEnhancedRequest<T> transactPutItemRequest(T model) {

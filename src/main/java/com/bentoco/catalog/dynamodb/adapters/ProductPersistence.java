@@ -1,15 +1,21 @@
 package com.bentoco.catalog.dynamodb.adapters;
 
-import com.bentoco.catalog.core.model.Product;
 import com.bentoco.catalog.core.repositories.ProductRepository;
-import com.bentoco.catalog.dynamodb.utils.DynamoDbUtils;
+import com.bentoco.catalog.model.ProductImmutableBeanItem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import software.amazon.awssdk.core.pagination.sync.SdkIterable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.Page;
+import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
 
-import static com.bentoco.catalog.constants.AwsConstants.PRODUCT_TABLE_NAME;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -18,27 +24,19 @@ public class ProductPersistence implements ProductRepository {
     private final DynamoDbEnhancedClient enhancedClient;
 
     @Override
-    public String insert(Product product) {
+    public String insert(ProductImmutableBeanItem product) {
         return null;
     }
 
-    private void doInsertionTransaction(Product productItem) {
-        String uniquePk = DynamoDbUtils.getUniquenessPk(productItem.getSk(), productItem.getTitle());
-        enhancedClient.transactWriteItems(i -> i
-                .addPutItem(this.getTable(), DynamoDbUtils.transactPutItemRequest(productItem))
-                .addPutItem(this.getTable(), DynamoDbUtils.transactPutItemRequest(buildProductTable(uniquePk, productItem.getSk())))
-        );
-    }
-
-    private static Product buildProductTable(String pk, String sk) {
-        return Product.builder()
+    private static ProductImmutableBeanItem buildProductTable(String pk, String sk) {
+        return ProductImmutableBeanItem.builder()
                 .pk(pk)
                 .sk(sk)
                 .build();
     }
 
     @Override
-    public void update(Product product) {
+    public void update(ProductImmutableBeanItem product) {
 
     }
 
@@ -47,7 +45,20 @@ public class ProductPersistence implements ProductRepository {
 
     }
 
-    private DynamoDbTable<Product> getTable() {
-        return enhancedClient.table(PRODUCT_TABLE_NAME, TableSchema.fromImmutableClass(Product.class));
+    @Override
+    public Boolean hasAnyRelationship(String categoryId) {
+        DynamoDbIndex<ProductImmutableBeanItem> index = this.getImmutableTable().index("category_id_index");
+        QueryConditional queryConditional = QueryConditional.keyEqualTo(Key.builder()
+                        .partitionValue(categoryId)
+                        .build());
+        SdkIterable<Page<ProductImmutableBeanItem>> results = index.query(QueryEnhancedRequest.builder()
+                .queryConditional(queryConditional)
+                .build());
+        return !results.iterator().next().items().isEmpty();
+    }
+
+
+    private DynamoDbTable<ProductImmutableBeanItem> getImmutableTable() {
+        return enhancedClient.table("catalog", TableSchema.fromImmutableClass(ProductImmutableBeanItem.class));
     }
 }
